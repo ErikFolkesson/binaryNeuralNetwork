@@ -1,4 +1,4 @@
-from src.utils.config import TrainingConfig
+from src.config import TrainingConfig
 from src.utils.logger import setup_logger
 from src.models.model import MyModel
 import torch.optim as optim
