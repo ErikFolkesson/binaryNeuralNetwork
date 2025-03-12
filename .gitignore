@@ -1,0 +1,4 @@
+data/raw/
+data/external/
+models/
+.ipynb_checkpoints/
