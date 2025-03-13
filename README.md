@@ -11,7 +11,9 @@ The MNIST dataset is used for training and evaluating the models. Downloaded usi
 
 # TODO
 - [ ] Add a path util to make sure the paths are correct
-- [ ] Make sure multiple training runs in a row are correctly saved in wandb (currently the steps just keep counting)
 - [ ] Add evaluation metrics to SimpleCNN
 - [ ] Modify train.py to train multiple SimpleCNN's
 - [ ] Add final evaluation using test set
+
+## Done
+- [X] Make sure multiple training runs in a row are correctly saved in wandb (currently the steps just keep counting)

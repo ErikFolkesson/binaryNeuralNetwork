@@ -114,10 +114,6 @@ def train_model(experiment_id=None):
 
     print("Training finished.")
 
-    # Save model
-    # torch.save(model.state_dict(), "logs/simple_cnn/simple_cnn_model.pth")
-    # wandb.save("simple_cnn_model.pth")
-
 # Main execution
 if __name__ == "__main__":
     train_model()
