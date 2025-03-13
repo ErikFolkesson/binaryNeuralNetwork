@@ -10,6 +10,7 @@ This project uses Weights & Biases for experiment tracking.
 The MNIST dataset is used for training and evaluating the models. Downloaded using the `torchvision` library.
 
 # TODO
+- [ ] Refractor and move CNN code to seperate files
 - [ ] Add automatic hyperparameter search
 
 ## Done
