@@ -2,4 +2,6 @@ data/raw/
 data/external/
 models/
 .ipynb_checkpoints/
+wandb/
+src/models/wandb/
 .env
