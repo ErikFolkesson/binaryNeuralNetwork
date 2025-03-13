@@ -38,24 +38,6 @@ class TestBaselineCNN(unittest.TestCase):
         output = model(x)
         self.assertEqual(output.shape, (batch_size, 10))
 
-    def test_get_data_loaders(self):
-        """Test that data loaders are created correctly."""
-        train_loader, test_loader = get_data_loaders()
-
-        # Check that loaders exist
-        self.assertIsNotNone(train_loader)
-        self.assertIsNotNone(test_loader)
-
-        # Get a batch to verify batch shape
-        images, labels = next(iter(train_loader))
-
-        # Check data types and shapes
-        self.assertEqual(images.dim(), 4)  # [batch_size, channels, height, width]
-        self.assertEqual(images.shape[1], 1)  # 1 channel for grayscale
-        self.assertEqual(images.shape[2], 28)  # Height
-        self.assertEqual(images.shape[3], 28)  # Width
-        self.assertEqual(labels.dim(), 1)  # [batch_size]
-
     def test_training_step(self):
         """Test that a single training step works."""
         model = SimpleCNN()

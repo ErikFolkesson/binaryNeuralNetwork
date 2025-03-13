@@ -18,6 +18,9 @@ import config.SimpleCNNConfig as TrainingConfig
 from src.utils.path_utils import get_models_dir, get_logs_dir
 TrainingConfig = TrainingConfig.TrainingConfig
 
+# Calculate F1 scores
+from sklearn.metrics import f1_score, confusion_matrix
+
 class SimpleCNN(nn.Module):
     """
     A simple Convolutional Neural Network for MNIST digit classification.
@@ -97,13 +100,20 @@ def train_model(experiment_id=None):
         dir=str(logs_dir)
     )
 
-    train_loader, _ = get_data_loaders()
+    train_loader, eval_loader, test_loader = mnist.get_train_eval_test_loaders(
+        train_batch_size=TrainingConfig.train_batch_size,
+        eval_batch_size=TrainingConfig.eval_batch_size,
+        test_batch_size=TrainingConfig.test_batch_size,
+        eval_split=TrainingConfig.eval_split
+    )
     model = SimpleCNN()
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=TrainingConfig.learning_rate)
 
     wandb.watch(model, log="all")
 
+    # Training loop
+    best_accuracy = 0.0
     for epoch in range(TrainingConfig.epochs):
         model.train()
         running_loss = 0.0
@@ -120,17 +130,97 @@ def train_model(experiment_id=None):
             if batch_idx % 100 == 99:  # Print every 100 batches
                 avg_loss = running_loss / 100
                 print(f'Epoch [{epoch + 1}/{TrainingConfig.epochs}], Step [{batch_idx + 1}/{len(train_loader)}], Loss: {running_loss / 100:.4f}')
-                wandb.log({"epoch": epoch + 1, "step": batch_idx + 1, "loss": avg_loss})
+                wandb.log({"epoch": epoch + 1, "step": batch_idx + 1, "train_loss": avg_loss})
                 running_loss = 0.0
+
+        # Evaluation phase
+        model.eval()
+        correct = 0
+        total = 0
+        val_loss = 0.0
+
+        with torch.no_grad():
+            for data, target in eval_loader:
+                outputs = model(data)
+                loss = criterion(outputs, target)
+                val_loss += loss.item()
+
+                _, predicted = torch.max(outputs.data, 1)
+                total += target.size(0)
+                correct += (predicted == target).sum().item()
+
+        # Calculate metrics
+        accuracy = 100 * correct / total
+        avg_val_loss = val_loss / len(eval_loader)
+
+        # Log metrics
+        wandb.log({
+            "epoch": epoch + 1,
+            "val_loss": avg_val_loss,
+            "val_accuracy": accuracy
+        })
+
+        print(f'Epoch [{epoch + 1}/{TrainingConfig.epochs}], '
+              f'Train Loss: {running_loss / len(train_loader):.4f}, '
+              f'Val Loss: {avg_val_loss:.4f}, '
+              f'Val Accuracy: {accuracy:.2f}%')
+
+        # Save best model
+        if accuracy > best_accuracy:
+            model_dir = get_models_dir() / "simple_cnn"
+            model_dir.mkdir(parents=True, exist_ok=True)
+            best_accuracy = accuracy
+            model_path = model_dir / f"best_simple_cnn_{experiment_id}.pt" if experiment_id else model_dir / "best_simple_cnn.pt"
+            torch.save(model.state_dict(), model_path)
+            print(f"Best model saved with accuracy: {best_accuracy:.2f}%")
 
     print("Training finished.")
 
-    # Save the trained model using path_utils
-    model_dir = get_models_dir() / "simple_cnn"
-    model_dir.mkdir(parents=True, exist_ok=True)
-    model_path = model_dir / f"simple_cnn_{experiment_id}.pt" if experiment_id else model_dir / "simple_cnn.pt"
-    torch.save(model.state_dict(), model_path)
-    print(f"Model saved to {model_path}")
+    # Final evaluation on the test set
+    model.eval()
+    test_loss = 0.0
+    correct = 0
+    total = 0
+    all_targets = []
+    all_predictions = []
+
+    with torch.no_grad():
+        for data, target in test_loader:
+            outputs = model(data)
+            loss = criterion(outputs, target)
+            test_loss += loss.item()
+
+            _, predicted = torch.max(outputs.data, 1)
+            total += target.size(0)
+            correct += (predicted == target).sum().item()
+
+            # Store for F1 score calculation
+            all_targets.extend(target.cpu().numpy())
+            all_predictions.extend(predicted.cpu().numpy())
+
+    # Calculate metrics
+    accuracy = 100 * correct / total
+    avg_test_loss = test_loss / len(test_loader)
+
+    f1_micro = f1_score(all_targets, all_predictions, average='micro')
+    f1_macro = f1_score(all_targets, all_predictions, average='macro')
+    conf_matrix = confusion_matrix(all_targets, all_predictions)
+
+    # Log final results
+    wandb.log({
+        "test_loss": avg_test_loss,
+        "test_accuracy": accuracy,
+        "test_f1_micro": f1_micro,
+        "test_f1_macro": f1_macro,
+        "confusion_matrix": wandb.plot.confusion_matrix(
+            preds=all_predictions,
+            y_true=all_targets,
+            class_names=[str(i) for i in range(10)]
+        )
+    })
+
+    print(f"Test Results - Loss: {avg_test_loss:.4f}, Accuracy: {accuracy:.2f}%")
+    print(f"F1 Score (micro): {f1_micro:.4f}, F1 Score (macro): {f1_macro:.4f}")
 
 # Main execution
 if __name__ == "__main__":
