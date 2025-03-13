@@ -15,7 +15,7 @@ import wandb
 
 import src.data.mnist_torchvision_data_loader as mnist
 import config.SimpleCNNConfig as TrainingConfig
-from src.utils.path_utils import get_models_dir
+from src.utils.path_utils import get_models_dir, get_logs_dir
 TrainingConfig = TrainingConfig.TrainingConfig
 
 class SimpleCNN(nn.Module):
@@ -78,14 +78,24 @@ def train_model(experiment_id=None):
     3. Trains the model for the configured number of epochs
     4. Saves the trained model weights
     """
+    # Set up wandb logging directory
+    logs_dir = get_logs_dir() / "simple_cnn"
+    logs_dir.mkdir(parents=True, exist_ok=True)
+
     # Initialize W&B for experiment tracking
     run_name = f"experiment_{experiment_id}" if experiment_id is not None else None
 
-    wandb.init(project="simple_cnn_project", name=run_name, config={
-        "epochs": TrainingConfig.epochs,
-        "batch_size": TrainingConfig.train_batch_size,
-        "learning_rate": TrainingConfig.learning_rate
-    }, reinit=True)
+    wandb.init(
+        project="simple_cnn_project",
+        name=run_name,
+        config={
+            "epochs": TrainingConfig.epochs,
+            "batch_size": TrainingConfig.train_batch_size,
+            "learning_rate": TrainingConfig.learning_rate
+        },
+        reinit=True,
+        dir=str(logs_dir)
+    )
 
     train_loader, _ = get_data_loaders()
     model = SimpleCNN()
@@ -116,7 +126,7 @@ def train_model(experiment_id=None):
     print("Training finished.")
 
     # Save the trained model using path_utils
-    model_dir = get_models_dir()
+    model_dir = get_models_dir() / "simple_cnn"
     model_dir.mkdir(parents=True, exist_ok=True)
     model_path = model_dir / f"simple_cnn_{experiment_id}.pt" if experiment_id else model_dir / "simple_cnn.pt"
     torch.save(model.state_dict(), model_path)
