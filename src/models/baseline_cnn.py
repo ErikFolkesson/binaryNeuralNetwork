@@ -15,6 +15,7 @@ import wandb
 
 import src.data.mnist_torchvision_data_loader as mnist
 import config.SimpleCNNConfig as TrainingConfig
+from src.utils.path_utils import get_models_dir
 TrainingConfig = TrainingConfig.TrainingConfig
 
 class SimpleCNN(nn.Module):
@@ -113,6 +114,13 @@ def train_model(experiment_id=None):
                 running_loss = 0.0
 
     print("Training finished.")
+
+    # Save the trained model using path_utils
+    model_dir = get_models_dir()
+    model_dir.mkdir(parents=True, exist_ok=True)
+    model_path = model_dir / f"simple_cnn_{experiment_id}.pt" if experiment_id else model_dir / "simple_cnn.pt"
+    torch.save(model.state_dict(), model_path)
+    print(f"Model saved to {model_path}")
 
 # Main execution
 if __name__ == "__main__":
