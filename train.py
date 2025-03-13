@@ -20,7 +20,7 @@ def main(args):
     for i in range(args.num_experiments):
         print(f"\nRunning experiment {i+1}/{args.num_experiments}")
         # Run the training process
-        train_model()
+        train_model(experiment_id=f"{args.experiment_name}_{i+1}")
 
     print("All training runs completed successfully")
 
