@@ -10,10 +10,10 @@ This project uses Weights & Biases for experiment tracking.
 The MNIST dataset is used for training and evaluating the models. Downloaded using the `torchvision` library.
 
 # TODO
-- [ ] Add a path util to make sure the paths are correct
 - [ ] Add evaluation metrics to SimpleCNN
-- [ ] Modify train.py to train multiple SimpleCNN's
-- [ ] Add final evaluation using test set
+- [ ] Add final evaluation of SimpleCNN using test set
 
 ## Done
 - [X] Make sure multiple training runs in a row are correctly saved in wandb (currently the steps just keep counting)
+- [X] Add a path util to make sure the paths are correct
+- [X] Modify train.py to train multiple SimpleCNN's
