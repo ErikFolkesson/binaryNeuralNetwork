@@ -12,9 +12,9 @@ import torch.optim as optim
 import torch
 
 import src.data.mnist_torchvision_data_loader as mnist
-
 from src.utils.path_utils import get_models_dir
 from src.utils.wandb_utils import setup_wandb, log_wandb, watch_wandb
+from src.utils.model_utils import save_best_model
 
 import config.simple_cnn_config as TrainingConfig
 TrainingConfig = TrainingConfig.TrainingConfig
@@ -131,15 +131,6 @@ def evaluate_model(model, criterion, data_loader, phase="val"):
     }
 
     return accuracy, avg_loss, metrics
-
-def save_best_model(model, accuracy, experiment_id=None):
-    """Save model if it's the best so far."""
-    model_dir = get_models_dir() / "simple_cnn"
-    model_dir.mkdir(parents=True, exist_ok=True)
-    model_path = model_dir / f"best_simple_cnn_{experiment_id}.pt" if experiment_id else model_dir / "best_simple_cnn.pt"
-    torch.save(model.state_dict(), model_path)
-    print(f"Best model saved with accuracy: {accuracy:.2f}%")
-    return model_path
 
 def train_model(use_wandb = False, experiment_id=None):
     """Train the SimpleCNN model on MNIST dataset with experiment tracking."""
