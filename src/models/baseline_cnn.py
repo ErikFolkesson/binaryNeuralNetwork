@@ -11,10 +11,10 @@ import torch.nn.functional as F
 import torch.optim as optim
 import torch
 
-import src.data.mnist_torchvision_data_loader as mnist
-from src.utils.path_utils import get_models_dir
+
 from src.utils.wandb_utils import setup_wandb, log_wandb, watch_wandb
 from src.utils.model_utils import save_best_model
+from src.data.mnist_torchvision_data_loader import get_train_eval_test_loaders
 
 import config.simple_cnn_config as TrainingConfig
 TrainingConfig = TrainingConfig.TrainingConfig
@@ -55,19 +55,6 @@ class SimpleCNN(nn.Module):
         x = F.relu(self.fc1(x))
         x = self.fc2(x)
         return x
-
-def get_data_loaders():
-    """
-    Create and return PyTorch data loaders for MNIST dataset.
-
-    Returns:
-        tuple: (train_loader, test_loader) containing the data loaders
-    """
-    train_data, test_data = mnist.get_data()
-    train_loader = mnist.get_data_loaders(train_data, TrainingConfig.train_batch_size)
-    test_loader = mnist.get_data_loaders(test_data, TrainingConfig.test_batch_size)
-
-    return train_loader, test_loader
 
 def initialize_model():
     """Initialize model, loss function, and optimizer."""
@@ -139,7 +126,7 @@ def train_model(use_wandb = False, experiment_id=None):
         setup_wandb(TrainingConfig, experiment_id)
 
     # Data loading
-    train_loader, eval_loader, test_loader = mnist.get_train_eval_test_loaders(
+    train_loader, eval_loader, test_loader = get_train_eval_test_loaders(
         train_batch_size=TrainingConfig.train_batch_size,
         eval_batch_size=TrainingConfig.eval_batch_size,
         test_batch_size=TrainingConfig.test_batch_size,
@@ -170,7 +157,7 @@ def train_model(use_wandb = False, experiment_id=None):
         # Save best model
         if val_accuracy > best_accuracy:
             best_accuracy = val_accuracy
-            save_best_model(model, best_accuracy, experiment_id)
+            save_best_model(model, "simple_cnn", experiment_id)
 
     print("Training finished.")
 
