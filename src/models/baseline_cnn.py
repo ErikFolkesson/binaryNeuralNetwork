@@ -11,15 +11,13 @@ import torch.nn.functional as F
 import torch.optim as optim
 import torch
 
-import wandb
-
 import src.data.mnist_torchvision_data_loader as mnist
-import config.SimpleCNNConfig as TrainingConfig
-from src.utils.path_utils import get_models_dir, get_logs_dir
-TrainingConfig = TrainingConfig.TrainingConfig
 
-# Calculate F1 scores
-from sklearn.metrics import f1_score, confusion_matrix
+from src.utils.path_utils import get_models_dir
+from src.utils.wandb_utils import setup_wandb, log_wandb, watch_wandb
+
+import config.simple_cnn_config as TrainingConfig
+TrainingConfig = TrainingConfig.TrainingConfig
 
 class SimpleCNN(nn.Module):
     """
@@ -71,25 +69,6 @@ def get_data_loaders():
 
     return train_loader, test_loader
 
-def setup_wandb(experiment_id=None):
-    """Set up Weights & Biases logging."""
-    logs_dir = get_logs_dir() / "simple_cnn"
-    logs_dir.mkdir(parents=True, exist_ok=True)
-
-    run_name = f"experiment_{experiment_id}" if experiment_id is not None else None
-
-    wandb.init(
-        project="simple_cnn_project",
-        name=run_name,
-        config={
-            "epochs": TrainingConfig.epochs,
-            "batch_size": TrainingConfig.train_batch_size,
-            "learning_rate": TrainingConfig.learning_rate
-        },
-        reinit=True,
-        dir=str(logs_dir)
-    )
-
 def initialize_model():
     """Initialize model, loss function, and optimizer."""
     model = SimpleCNN()
@@ -97,7 +76,7 @@ def initialize_model():
     optimizer = optim.Adam(model.parameters(), lr=TrainingConfig.learning_rate)
     return model, criterion, optimizer
 
-def train_epoch(model, criterion, optimizer, train_loader, epoch, epochs):
+def train_epoch(model, criterion, optimizer, train_loader, epoch, epochs, use_wandb):
     """Train the model for a single epoch."""
     model.train()
     running_loss = 0.0
@@ -115,7 +94,8 @@ def train_epoch(model, criterion, optimizer, train_loader, epoch, epochs):
         if batch_idx % 100 == 99:
             avg_loss = running_loss / 100
             print(f'Epoch [{epoch + 1}/{epochs}], Step [{batch_idx + 1}/{len(train_loader)}], Loss: {avg_loss:.4f}')
-            wandb.log({"epoch": epoch + 1, "step": batch_idx + 1, "train_loss": avg_loss})
+            if use_wandb:
+                log_wandb({"epoch": epoch + 1, "step": batch_idx + 1, "train_loss": avg_loss})
             running_loss = 0.0
 
     return running_loss / len(train_loader)
@@ -150,17 +130,6 @@ def evaluate_model(model, criterion, data_loader, phase="val"):
         f"{phase}_accuracy": accuracy
     }
 
-    if phase == "test":
-        metrics.update({
-            "test_f1_micro": f1_score(all_targets, all_predictions, average='micro'),
-            "test_f1_macro": f1_score(all_targets, all_predictions, average='macro'),
-            "confusion_matrix": wandb.plot.confusion_matrix(
-                preds=all_predictions,
-                y_true=all_targets,
-                class_names=[str(i) for i in range(10)]
-            )
-        })
-
     return accuracy, avg_loss, metrics
 
 def save_best_model(model, accuracy, experiment_id=None):
@@ -172,10 +141,11 @@ def save_best_model(model, accuracy, experiment_id=None):
     print(f"Best model saved with accuracy: {accuracy:.2f}%")
     return model_path
 
-def train_model(experiment_id=None):
+def train_model(use_wandb = False, experiment_id=None):
     """Train the SimpleCNN model on MNIST dataset with experiment tracking."""
     # Setup
-    setup_wandb(experiment_id)
+    if use_wandb:
+        setup_wandb(TrainingConfig, experiment_id)
 
     # Data loading
     train_loader, eval_loader, test_loader = mnist.get_train_eval_test_loaders(
@@ -187,17 +157,19 @@ def train_model(experiment_id=None):
 
     # Model initialization
     model, criterion, optimizer = initialize_model()
-    wandb.watch(model, log="all")
+    if use_wandb:
+        watch_wandb(model)
 
     # Training
     best_accuracy = 0.0
     for epoch in range(TrainingConfig.epochs):
         # Train
-        train_loss = train_epoch(model, criterion, optimizer, train_loader, epoch, TrainingConfig.epochs)
+        train_loss = train_epoch(model, criterion, optimizer, train_loader, epoch, TrainingConfig.epochs, use_wandb=use_wandb)
 
         # Evaluate
         val_accuracy, val_loss, val_metrics = evaluate_model(model, criterion, eval_loader, "val")
-        wandb.log({"epoch": epoch + 1, **val_metrics})
+        if use_wandb:
+            log_wandb({"epoch": epoch + 1, **val_metrics})
 
         print(f'Epoch [{epoch + 1}/{TrainingConfig.epochs}], '
               f'Train Loss: {train_loss:.4f}, '
@@ -213,10 +185,11 @@ def train_model(experiment_id=None):
 
     # Test evaluation
     test_accuracy, test_loss, test_metrics = evaluate_model(model, criterion, test_loader, "test")
-    wandb.log(test_metrics)
+
+    if use_wandb:
+        log_wandb(test_metrics)
 
     print(f"Test Results - Loss: {test_loss:.4f}, Accuracy: {test_accuracy:.2f}%")
-    print(f"F1 Score (micro): {test_metrics['test_f1_micro']:.4f}, F1 Score (macro): {test_metrics['test_f1_macro']:.4f}")
 
     return model
 
