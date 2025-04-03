@@ -16,7 +16,6 @@ The MNIST dataset is used for training and evaluating the models. Downloaded usi
 - [ ] Add automatic hyperparameter search
 
 ### Done
-- [X] Setup linter
 - [X] Create visualization, Python file with helper function
 - [X] Create local logging
 - [X] Refractor and move CNN code to seperate files

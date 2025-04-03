@@ -1,6 +1,3 @@
-from pathlib import Path
-from typing import Union, Any
-
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
@@ -58,7 +55,16 @@ def initialize_model():
     optimizer = optim.Adam(model.parameters(), lr=TrainingConfig.learning_rate)
     return model, criterion, optimizer
 
-def train_epoch(model, criterion, optimizer, train_loader, epoch, epochs, use_wandb, print_interval=100):
+def train_epoch(
+    model,
+    criterion,
+    optimizer,
+    train_loader,
+    epoch,
+    epochs,
+    use_wandb,
+    print_interval=100
+):
     """Train the model for a single epoch."""
     model.train()
     running_loss = 0.0
@@ -77,7 +83,8 @@ def train_epoch(model, criterion, optimizer, train_loader, epoch, epochs, use_wa
         total_running_loss += loss.item()
         if batch_idx % print_interval == print_interval-1:
             avg_loss = running_loss / print_interval
-            print(f'Epoch [{epoch + 1}/{epochs}], Step [{batch_idx + 1}/{len(train_loader)}], Loss: {avg_loss:.4f}')
+            print(f'Epoch [{epoch + 1}/{epochs}], Step [{batch_idx + 1}/'
+                  f'{len(train_loader)}], Loss: {avg_loss:.4f}')
             if use_wandb:
                 log_wandb({"epoch": epoch + 1, "step": batch_idx + 1, "train_loss": avg_loss})
             running_loss = 0.0
@@ -146,7 +153,8 @@ def train_model(use_wandb = False, logging = True, experiment_id=None):
     best_accuracy = 0.0
     for epoch in range(TrainingConfig.epochs):
         # Train
-        train_loss = train_epoch(model, criterion, optimizer, train_loader, epoch, TrainingConfig.epochs, use_wandb=use_wandb, print_interval=500)
+        train_loss = train_epoch(model, criterion, optimizer, train_loader, epoch,
+                                 TrainingConfig.epochs, use_wandb=use_wandb, print_interval=500)
 
         # Evaluate
         val_accuracy, val_loss, val_metrics = evaluate_model(model, criterion, eval_loader, "val")
