@@ -1,10 +1,3 @@
-"""
-Baseline CNN model implementation for MNIST digit classification.
-
-This module provides a simple CNN architecture for MNIST classification,
-along with utilities for data loading and model training. The implementation
-integrates with Weights & Biases for experiment tracking.
-"""
 from pathlib import Path
 from typing import Union, Any
 
@@ -12,7 +5,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 import torch
-
 
 from src.utils.wandb_utils import setup_wandb, log_wandb, watch_wandb
 from src.utils.model_utils import save_best_model

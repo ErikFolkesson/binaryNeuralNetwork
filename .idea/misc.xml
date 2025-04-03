@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="Black">
+    <option name="pathToExecutable" value="C:\Users\erik\anaconda3\Scripts\black.exe" />
     <option name="sdkName" value="torch_proj" />
   </component>
   <component name="ProjectRootManager" version="2" project-jdk-name="torch_proj" project-jdk-type="Python SDK" />

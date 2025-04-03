@@ -1,4 +1,3 @@
-import datetime
 import csv
 
 from src.utils.path_utils import get_logs_dir
