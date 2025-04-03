@@ -13,14 +13,12 @@ The MNIST dataset is used for training and evaluating the models. Downloaded usi
 ### TODO: Binary Neural Network: 
 - [ ] 
 ### TODO: General Quality
-- [ ] Create local logging
-- [ ] Create visualization
-  - [ ] Easy to reuse notebook 
-  - [ ] Python file with helper function
 - [ ] Setup linter and other code quality tools
 - [ ] Add automatic hyperparameter search
 
 ### Done
+- [X] Create visualization, Python file with helper function
+- [X] Create local logging
 - [X] Refractor and move CNN code to seperate files
 - [X] Make it easier to turn off BandW. 
 - [X] Make sure multiple training runs in a row are correctly saved in wandb (currently the steps just keep counting)
