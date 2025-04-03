@@ -4,6 +4,7 @@ from pathlib import Path
 from src.data.mnist_torchvision_data_loader import get_data, get_train_eval_test_loaders
 from src.utils.path_utils import get_raw_data_dir
 
+
 class TestMNISTDataLoader(unittest.TestCase):
     def test_get_data_default_path(self):
         # Test using default path (from path_utils)
@@ -29,7 +30,7 @@ class TestMNISTDataLoader(unittest.TestCase):
 
         # Check dataset sizes (with default 20% eval split)
         self.assertEqual(len(train_loader.dataset), 48000)  # 80% of 60000
-        self.assertEqual(len(eval_loader.dataset), 12000)   # 20% of 60000
+        self.assertEqual(len(eval_loader.dataset), 12000)  # 20% of 60000
         self.assertEqual(len(test_loader.dataset), 10000)
 
     def test_train_eval_test_loaders_custom_batch_sizes(self):
@@ -47,7 +48,7 @@ class TestMNISTDataLoader(unittest.TestCase):
         train_loader, eval_loader, test_loader = get_train_eval_test_loaders(eval_split=0.3)
 
         self.assertEqual(len(train_loader.dataset), 42000)  # 70% of 60000
-        self.assertEqual(len(eval_loader.dataset), 18000)   # 30% of 60000
+        self.assertEqual(len(eval_loader.dataset), 18000)  # 30% of 60000
         self.assertEqual(len(test_loader.dataset), 10000)
 
     def test_train_eval_test_loaders_custom_path(self):
@@ -69,8 +70,9 @@ class TestMNISTDataLoader(unittest.TestCase):
         self.assertEqual(eval_loader1.dataset.indices, eval_loader2.dataset.indices)
 
         # Different seeds should give different splits
-        train_loader3, eval_loader3, _ = get_train_eval_test_loaders(random_seed=seed+1)
+        train_loader3, eval_loader3, _ = get_train_eval_test_loaders(random_seed=seed + 1)
         self.assertNotEqual(train_loader1.dataset.indices, train_loader3.dataset.indices)
+
 
 if __name__ == '__main__':
     unittest.main()

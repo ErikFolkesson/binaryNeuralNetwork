@@ -13,7 +13,7 @@ The MNIST dataset is used for training and evaluating the models. Downloaded usi
 ### TODO: Binary Neural Network: 
 - [ ] 
 ### TODO: General Quality
-- [ ] Add automatic hyperparameter search
+- [ ] Write a more thorough README.md
 
 ### Done
 - [X] Create visualization, Python file with helper function

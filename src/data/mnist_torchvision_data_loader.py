@@ -5,6 +5,7 @@ from src.utils.path_utils import get_raw_data_dir
 from torch.utils.data import random_split
 import torch
 
+
 def get_data(data_dir=None):
     """
     Get MNIST training and test datasets.
@@ -27,8 +28,9 @@ def get_data_loaders(data, batch_size):
     data_loader = DataLoader(data, batch_size=batch_size, shuffle=True)
     return data_loader
 
+
 def get_train_eval_test_loaders(train_batch_size=32, eval_batch_size=32, test_batch_size=32,
-                               eval_split=0.2, random_seed=42, data_dir=None):
+                                eval_split=0.2, random_seed=42, data_dir=None):
     """
     Get MNIST train, evaluation, and test data loaders.
 

@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import torch
 
+
 def plot_mnist_data(data: torch.utils.data.Dataset, n_rows=4, n_cols=4):
     # Plot more images
     torch.manual_seed(99)

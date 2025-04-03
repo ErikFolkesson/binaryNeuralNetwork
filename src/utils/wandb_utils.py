@@ -2,6 +2,7 @@ import wandb
 
 from src.utils.path_utils import get_logs_dir
 
+
 def setup_wandb(training_config, model_name: str, experiment_id=None):
     """Set up Weights & Biases logging."""
     logs_dir = get_logs_dir() / model_name
@@ -21,8 +22,10 @@ def setup_wandb(training_config, model_name: str, experiment_id=None):
         dir=str(logs_dir)
     )
 
+
 def log_wandb(data: dict):
     wandb.log(data)
 
+
 def watch_wandb(model):
-    wandb.watch(model, log = "all")
+    wandb.watch(model, log="all")

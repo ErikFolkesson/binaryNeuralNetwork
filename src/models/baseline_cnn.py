@@ -9,7 +9,9 @@ from src.utils.logging_util import setup_logging, log_metrics
 from src.data.mnist_torchvision_data_loader import get_train_eval_test_loaders
 
 import config.simple_cnn_config as TrainingConfig
+
 TrainingConfig = TrainingConfig.TrainingConfig
+
 
 class SimpleCNN(nn.Module):
     """
@@ -22,6 +24,7 @@ class SimpleCNN(nn.Module):
     Input: [batch_size, 1, 28, 28] MNIST images
     Output: [batch_size, 10] class probabilities
     """
+
     def __init__(self):
         """Initialize the CNN architecture with convolutional and fully connected layers."""
         super(SimpleCNN, self).__init__()
@@ -48,6 +51,7 @@ class SimpleCNN(nn.Module):
         x = self.fc2(x)
         return x
 
+
 def initialize_model():
     """Initialize model, loss function, and optimizer."""
     model = SimpleCNN()
@@ -55,15 +59,16 @@ def initialize_model():
     optimizer = optim.Adam(model.parameters(), lr=TrainingConfig.learning_rate)
     return model, criterion, optimizer
 
+
 def train_epoch(
-    model,
-    criterion,
-    optimizer,
-    train_loader,
-    epoch,
-    epochs,
-    use_wandb,
-    print_interval=100
+        model,
+        criterion,
+        optimizer,
+        train_loader,
+        epoch,
+        epochs,
+        use_wandb,
+        print_interval=100
 ):
     """Train the model for a single epoch."""
     model.train()
@@ -81,7 +86,7 @@ def train_epoch(
         # Logging
         running_loss += loss.item()
         total_running_loss += loss.item()
-        if batch_idx % print_interval == print_interval-1:
+        if batch_idx % print_interval == print_interval - 1:
             avg_loss = running_loss / print_interval
             print(f'Epoch [{epoch + 1}/{epochs}], Step [{batch_idx + 1}/'
                   f'{len(train_loader)}], Loss: {avg_loss:.4f}')
@@ -90,6 +95,7 @@ def train_epoch(
             running_loss = 0.0
 
     return total_running_loss / len(train_loader)
+
 
 def evaluate_model(model, criterion, data_loader, phase="val"):
     """Evaluate the model on the given data loader."""
@@ -123,7 +129,8 @@ def evaluate_model(model, criterion, data_loader, phase="val"):
 
     return accuracy, avg_loss, metrics
 
-def train_model(use_wandb = False, logging = True, experiment_id=None):
+
+def train_model(use_wandb=False, logging=True, experiment_id=None):
     """Train the SimpleCNN model on MNIST dataset with experiment tracking."""
     # Data loading
     train_loader, eval_loader, test_loader = get_train_eval_test_loaders(
@@ -139,7 +146,6 @@ def train_model(use_wandb = False, logging = True, experiment_id=None):
     if use_wandb:
         setup_wandb(TrainingConfig, experiment_id)
         watch_wandb(model)
-
 
     train_loss_list = []
     val_accuracy_list = []
@@ -198,6 +204,7 @@ def train_model(use_wandb = False, logging = True, experiment_id=None):
     print(f"Test Results - Loss: {test_loss:.4f}, Accuracy: {test_accuracy:.2f}%")
 
     return model
+
 
 if __name__ == "__main__":
     train_model()

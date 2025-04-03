@@ -6,6 +6,7 @@ from pathlib import Path
 from src.models.baseline_cnn import SimpleCNN, get_data_loaders, train_model
 from src.utils.path_utils import get_models_dir
 
+
 class TestBaselineCNN(unittest.TestCase):
     def test_model_structure(self):
         """Test that the model initializes with the expected structure."""
@@ -76,6 +77,7 @@ class TestBaselineCNN(unittest.TestCase):
         # Clean up
         if test_path.exists():
             os.remove(test_path)
+
 
 if __name__ == '__main__':
     unittest.main()

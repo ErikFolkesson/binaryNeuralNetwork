@@ -8,6 +8,7 @@ from src.utils.path_utils import (
     get_models_dir
 )
 
+
 class TestPathUtils(unittest.TestCase):
 
     def test_get_project_root(self):
